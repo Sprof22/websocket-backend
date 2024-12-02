@@ -1,22 +1,23 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { NestExpressApplication } from '@nestjs/platform-express';
-import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    rawBody: true,
+  // Create the application instance
+  const app = await NestFactory.create(AppModule);
+
+  // Enable CORS
+  app.enableCors({
+    origin: '*', // Allow all origins (replace with specific domains in production)
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    credentials: true,
   });
 
-  app.enableCors();
+  // Set the port from environment variables or fallback to 3000
+  const port = process.env.PORT || 3000;
 
-  const configService = app.get(ConfigService);
-  console.log('NODE_ENV:', process.env.NODE_ENV);
-
-  const port = configService.get<number>('PORT', 3000); // Fallback to port 3000 if not defined
-
+  // Start the server
   await app.listen(port);
-
-  console.log(`Application is running on: ${await app.getUrl()}`);
+  console.log(`WebSocket server is running on: ws://localhost:${port}`);
 }
+
 bootstrap();
